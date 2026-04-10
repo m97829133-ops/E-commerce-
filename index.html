@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pro E-Commerce</title>
+
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#f4f4f4;
+}
+
+/* LOGIN */
+.loginBg{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#1f1c2c,#928DAB);
+}
+
+.loginCard{
+background:rgba(255,255,255,0.15);
+backdrop-filter:blur(12px);
+padding:30px;
+border-radius:15px;
+text-align:center;
+color:white;
+width:300px;
+box-shadow:0 0 20px rgba(0,0,0,0.3);
+}
+
+.loginBtn{
+margin-top:15px;
+padding:10px;
+width:100%;
+border:none;
+border-radius:8px;
+background:#00c853;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+
+/* HEADER */
+header{
+background:#111;
+color:white;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px;
+flex-wrap:wrap;
+}
+
+input,select{
+padding:8px;
+margin:5px;
+border-radius:5px;
+border:1px solid #ccc;
+}
+
+/* GRID */
+.container{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:15px;
+padding:15px;
+}
+
+.card{
+background:white;
+padding:10px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+.card img{
+width:100%;
+height:160px;
+object-fit:cover;
+border-radius:10px;
+}
+
+button{
+padding:8px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+margin-top:5px;
+}
+
+.add{background:green;color:white;width:100%}
+.buy{background:orange;color:black;width:100%}
+
+/* CART DRAWER */
+.cart{
+position:fixed;
+right:0;
+top:0;
+width:300px;
+height:100%;
+background:white;
+box-shadow:-5px 0 10px rgba(0,0,0,0.2);
+transform:translateX(100%);
+transition:0.3s;
+padding:15px;
+}
+
+.cart.open{
+transform:translateX(0);
+}
+
+/* ADMIN */
+.admin{
+padding:20px;
+background:#fff;
+margin:10px;
+border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+const {useState} = React;
+
+/* DEFAULT PRODUCTS */
+const defaultProducts = [
+{ id:1, name:"Nike Shoes", price:120, category:"Shoes", img:"https://images.unsplash.com/photo-1519741497674-611481863552" },
+{ id:2, name:"Smart Watch", price:80, category:"Watch", img:"https://images.unsplash.com/photo-1523275335684-37898b6baf30" },
+{ id:3, name:"Headphones", price:50, category:"Tech", img:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" }
+];
+
+/* LOGIN UI */
+const styles = {
+loginBg:{
+height:"100vh",
+display:"flex",
+justifyContent:"center",
+alignItems:"center",
+background:"linear-gradient(135deg,#1f1c2c,#928DAB)"
+},
+loginCard:{
+background:"rgba(255,255,255,0.15)",
+backdropFilter:"blur(12px)",
+padding:"30px",
+borderRadius:"15px",
+textAlign:"center",
+color:"white",
+width:"300px",
+boxShadow:"0 0 20px rgba(0,0,0,0.3)"
+},
+loginBtn:{
+marginTop:"15px",
+padding:"10px",
+width:"100%",
+border:"none",
+borderRadius:"8px",
+background:"#00c853",
+color:"white",
+cursor:"pointer",
+fontWeight:"bold"
+}
+};
+
+/* PRODUCT CARD */
+function Card({p, addToCart}){
+return(
+<div className="card">
+<img src={p.img}/>
+<h3>{p.name}</h3>
+<p>${p.price}</p>
+<button className="add" onClick={()=>addToCart(p)}>Add to Cart</button>
+</div>
+)
+}
+
+/* CART */
+function Cart({cart, open, setOpen, buy}){
+return(
+<div className={`cart ${open?"open":""}`}>
+<h2>🛒 Cart</h2>
+<button onClick={()=>setOpen(false)}>Close</button>
+
+{cart.map((c,i)=>(
+<p key={i}>{c.name} - ${c.price}</p>
+))}
+
+<h3>Total: ${cart.reduce((a,b)=>a+b.price,0)}</h3>
+
+<button className="buy" onClick={buy}>BUY NOW</button>
+</div>
+)
+}
+
+/* APP */
+function App(){
+
+const [user,setUser]=useState(null);
+const [products,setProducts]=useState(defaultProducts);
+const [cart,setCart]=useState([]);
+const [openCart,setOpenCart]=useState(false);
+
+const [search,setSearch]=useState("");
+const [category,setCategory]=useState("All");
+
+const [admin,setAdmin]=useState({name:"",price:"",img:"",category:""});
+
+/* LOGIN */
+const login=()=>{
+setUser({name:"Admin"});
+}
+
+/* LOGOUT */
+const logout=()=>{
+setUser(null);
+}
+
+/* ADD PRODUCT */
+const addProduct=()=>{
+setProducts([...products,{
+id:Date.now(),
+...admin,
+price:Number(admin.price)
+}]);
+}
+
+/* CART */
+const addToCart=(p)=>{
+setCart([...cart,p]);
+setOpenCart(true);
+}
+
+/* BUY */
+const buy=()=>{
+alert("🎉 Order Placed Successfully!");
+setCart([]);
+setOpenCart(false);
+}
+
+/* FILTER */
+const filtered = products.filter(p=>{
+return p.name.toLowerCase().includes(search.toLowerCase())
+&& (category==="All" || p.category===category);
+});
+
+/* LOGIN SCREEN */
+if(!user){
+return(
+<div style={styles.loginBg}>
+<div style={styles.loginCard}>
+<h2>🔐 Welcome Back</h2>
+<p>Login to continue</p>
+
+<button style={styles.loginBtn} onClick={login}>
+Login as Admin/User
+</button>
+
+<p style={{fontSize:"12px",marginTop:"10px"}}>
+Demo Login (no password)
+</p>
+</div>
+</div>
+)
+}
+
+return(
+<div>
+
+{/* HEADER */}
+<header>
+<h2>🛍 Pro Store</h2>
+
+<div>
+<input placeholder="Search..." onChange={e=>setSearch(e.target.value)}/>
+
+<select onChange={e=>setCategory(e.target.value)}>
+<option>All</option>
+<option>Shoes</option>
+<option>Watch</option>
+<option>Tech</option>
+</select>
+
+<button onClick={()=>setOpenCart(true)}>
+Cart ({cart.length})
+</button>
+
+<button onClick={logout}>Logout</button>
+</div>
+</header>
+
+{/* PRODUCTS */}
+<div className="container">
+{filtered.map(p=>(
+<Card key={p.id} p={p} addToCart={addToCart}/>
+))}
+</div>
+
+{/* CART */}
+<Cart cart={cart} open={openCart} setOpen={setOpenCart} buy={buy}/>
+
+{/* ADMIN PANEL */}
+<div className="admin">
+<h2>Admin Panel</h2>
+
+<input placeholder="Name"
+onChange={e=>setAdmin({...admin,name:e.target.value})}/>
+
+<input placeholder="Price"
+onChange={e=>setAdmin({...admin,price:e.target.value})}/>
+
+<input placeholder="Image URL"
+onChange={e=>setAdmin({...admin,img:e.target.value})}/>
+
+<input placeholder="Category"
+onChange={e=>setAdmin({...admin,category:e.target.value})}/>
+
+<button onClick={addProduct}>Add Product</button>
+</div>
+
+</div>
+)
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+
+</script>
+</body>
+</html>
